@@ -33,7 +33,7 @@ export function FormCars({
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 dark:bg-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             type="text"
             name="brand"
-            value={cars.brand ?? ""}
+            value={cars.brand || ''}
             onChange={handleChangeBrand}
             required
           />
@@ -46,20 +46,20 @@ export function FormCars({
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 dark:bg-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             type="text"
             name="model"
-            value={cars.model ?? ""}
+            value={cars.model || ''}
             onChange={handleChangeModel}
             required
           />
         </div>
         <div className="mb-4">
-          <label className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2" htmlFor="class">
+          <label className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2" htmlFor="price">
             Prix
           </label>
           <input
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 dark:bg-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             type="number"
             name="price"
-            value={cars.price ?? 0}
+            value={cars.price || 0}
             onChange={handleChangePrice}
             required
           />
@@ -72,7 +72,7 @@ export function FormCars({
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 dark:bg-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             type="date"
             name="first_registration_date"
-            value={cars.first_registration_date ?? ""}
+            value={cars.first_registration_date || ''}
             onChange={handleChangeFirstRegistrationDate}
             required
           />
@@ -84,7 +84,7 @@ export function FormCars({
           <input
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 dark:bg-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             name="litle_name"
-            value={cars.litle_name ?? ""}
+            value={cars.litle_name || ''}
             onChange={handleChangeLitleName}
             required
           />

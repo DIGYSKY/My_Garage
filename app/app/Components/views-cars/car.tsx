@@ -4,23 +4,21 @@ import axios from "axios";
 import { useParams, useNavigate } from "react-router";
 
 export function Car() {
-  const [car, setCar] = useState<Cars>();
+  const [car, setCar] = useState<Cars | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const handleDelete = () => {
-    axios.delete(`http://localhost:81/cars/:${id}`)
-      .then(() => {
-        console.log("Véhicule supprimé avec succès");
-        navigate("/");
-      })
-      .catch((error) => {
-        console.log(error);
-        setError(error as Error);
-        setIsLoading(false);
-      });
+  const handleDelete = async () => {
+    try {
+      await axios.delete(`http://localhost:81/cars/:${id}`);
+      console.log("Véhicule supprimé avec succès");
+      navigate("/cars/list");
+    } catch (error) {
+      console.error(error);
+      setError(error as Error);
+    }
   };
 
   const handleUpdate = () => {
@@ -28,53 +26,57 @@ export function Car() {
   };
 
   useEffect(() => {
+    console.log(id);
     if (!id) return;
-    const fetchPersos = async () => {
+
+    const fetchCar = async () => {
       try {
         const response = await axios.get(`http://localhost:81/cars/:${id}`);
-        setCar(response.data);
+        if (response.data && response.data.data) {
+          setCar(response.data.data);
+        } else {
+          throw new Error("Données invalides reçues du serveur");
+        }
         setIsLoading(false);
       } catch (err: unknown) {
         if (err instanceof Error) {
           setError(err);
         } else {
-          setError(new Error("An unknown error occurred"));
+          setError(new Error("Une erreur inconnue est survenue"));
         }
         setIsLoading(false);
       }
     };
-    fetchPersos();
+    fetchCar();
   }, [id]);
 
   if (isLoading) return <div>Chargement...</div>;
   if (error) return <div>Erreur: {error.message}</div>;
+  if (!car) return <div>Véhicule non trouvé</div>;
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Liste des Véhicules</h1>
-      <div className="grid gap-4">
-        {car && (
-          <div key={car.brand} className="p-4 border rounded shadow">
-            <h2 className="text-lg font-bold">{car.litle_name}</h2>
-            <p className="text-sm text-gray-500">{car.brand}</p>
-            <p className="text-sm text-gray-500">{car.model}</p>
-            <p className="text-sm text-gray-500">{car.price}</p>
-            <p className="text-sm text-gray-500">{car.first_registration_date}</p>
-            <button className="bg-blue-500 text-white p-2 rounded" onClick={handleUpdate}>Modifier</button>
-            <button className="bg-red-500 text-white p-2 rounded" onClick={handleDelete}>Supprimer</button>
-          </div>
-        )}
-        {!car && isLoading && (
-          <div>
-            <p>Aucun véhicule trouvé</p>
-          </div>
-        )}
-        {error && <div>Erreur: {error}</div>}
-        {isLoading && (
-          <div>
-            <p>Chargement...</p>
-          </div>
-        )}
+      <h1 className="text-2xl font-bold mb-4">Détails du Véhicule</h1>
+      <div className="p-4 border rounded shadow">
+        <h2 className="text-lg font-bold">{car.litle_name}</h2>
+        <p className="text-sm text-gray-500">Marque: {car.brand}</p>
+        <p className="text-sm text-gray-500">Modèle: {car.model}</p>
+        <p className="text-sm text-gray-500">Prix: {car.price} €</p>
+        <p className="text-sm text-gray-500">Date d'immatriculation: {car.first_registration_date}</p>
+        <div className="mt-4 space-x-2">
+          <button
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            onClick={handleUpdate}
+          >
+            Modifier
+          </button>
+          <button
+            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+            onClick={handleDelete}
+          >
+            Supprimer
+          </button>
+        </div>
       </div>
     </div>
   );

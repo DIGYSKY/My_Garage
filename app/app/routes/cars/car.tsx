@@ -1,5 +1,5 @@
 import { Car as CarComponent } from "../../Components/views-cars/car";
 
-export function Car() {
+export default function Car() {
   return <CarComponent />;
 }

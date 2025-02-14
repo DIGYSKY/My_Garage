@@ -14,6 +14,7 @@ export interface Cars {
 }
 
 export function AddCars() {
+  const navigate = useNavigate();
   const [cars, setCars] = useState<Cars>({
     brand: "",
     model: "",
@@ -45,7 +46,7 @@ export function AddCars() {
     setError(null);
     axios.post("http://localhost:81/cars", cars)
       .then((response) => {
-        console.log(response);
+        navigate("/cars/list");
         setIsLoading(false);
       })
       .catch((error) => {

@@ -1,6 +1,6 @@
 <?php
 
-class CarsModels
+class CarsModels implements JsonSerializable
 {
   private $id;
   private $litle_name;
@@ -83,8 +83,14 @@ class CarsModels
   {
     $sql = "UPDATE cars SET litle_name = ?, brand = ?, model = ?, first_registration_date = ?, price = ? WHERE id = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssssii", $this->litle_name, $this->brand, $this->model, $this->first_registration_date, $this->price, $this->id);
-    return $stmt->execute();
+    return $stmt->execute([
+      $this->litle_name,
+      $this->brand,
+      $this->model,
+      $this->first_registration_date,
+      $this->price,
+      $this->id
+    ]);
   }
 
   // Delete method
@@ -92,19 +98,16 @@ class CarsModels
   {
     $sql = "DELETE FROM cars WHERE id = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $this->id);
-    return $stmt->execute();
+    return $stmt->execute([$this->id]);
   }
 
   public function loadFromDatabase($conn, $id)
   {
     $sql = "SELECT * FROM cars WHERE id = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    $stmt->execute([$id]);
 
-    if ($row = $result->fetch_assoc()) {
+    if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
       $this->id = $row['id'];
       $this->litle_name = $row['litle_name'];
       $this->brand = $row['brand'];
@@ -120,14 +123,18 @@ class CarsModels
 
   public static function getAllCars($conn, $offset, $limit)
   {
-    $sql = "SELECT * FROM cars LIMIT ? OFFSET ?";
+    // Cast parameters to integers to avoid SQL syntax errors
+    $offset = (int)$offset;
+    $limit = (int)$limit;
+
+    $sql = "SELECT * FROM cars LIMIT :limit OFFSET :offset";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ii", $limit, $offset);
+    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
     $stmt->execute();
-    $result = $stmt->get_result();
 
     $cars = [];
-    while ($row = $result->fetch_assoc()) {
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
       $car = new CarsModels();
       $car->id = $row['id'];
       $car->litle_name = $row['litle_name'];
@@ -147,7 +154,27 @@ class CarsModels
   {
     $sql = "INSERT INTO cars (litle_name, brand, model, first_registration_date, price) VALUES (?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssssi", $this->litle_name, $this->brand, $this->model, $this->first_registration_date, $this->price);
-    return $stmt->execute();
+    return $stmt->execute([
+      $this->litle_name,
+      $this->brand,
+      $this->model,
+      $this->first_registration_date,
+      $this->price
+    ]);
+  }
+
+  // Add this new method for JSON serialization
+  public function jsonSerialize(): array
+  {
+    return [
+      'id' => $this->id,
+      'litle_name' => $this->litle_name,
+      'brand' => $this->brand,
+      'model' => $this->model,
+      'first_registration_date' => $this->first_registration_date,
+      'price' => $this->price,
+      'updated_at' => $this->updated_at,
+      'created_at' => $this->created_at
+    ];
   }
 }

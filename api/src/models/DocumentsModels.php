@@ -1,6 +1,6 @@
 <?php
 
-class DocumentsModels
+class DocumentsModels implements JsonSerializable
 {
   private $id;
   private $id_cars;
@@ -78,17 +78,30 @@ class DocumentsModels
     $this->path = $path;
   }
 
+  // Add JSON serialization method
+  public function jsonSerialize(): array
+  {
+    return [
+      'id' => $this->id,
+      'id_cars' => $this->id_cars,
+      'name' => $this->name,
+      'description' => $this->description,
+      'type' => $this->type,
+      'path' => $this->path,
+      'updated_at' => $this->updated_at,
+      'created_at' => $this->created_at
+    ];
+  }
+
   // Load documents by car ID
   public static function loadDocumentsByCarsId($conn, $id_cars)
   {
     $sql = "SELECT * FROM documents WHERE id_cars = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $id_cars);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    $stmt->execute([$id_cars]);
 
     $documents = [];
-    while ($row = $result->fetch_assoc()) {
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
       $document = new DocumentsModels();
       $document->id = $row['id'];
       $document->id_cars = $row['id_cars'];
@@ -109,11 +122,9 @@ class DocumentsModels
   {
     $sql = "SELECT * FROM documents WHERE id = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    $stmt->execute([$id]);
 
-    if ($row = $result->fetch_assoc()) {
+    if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
       $this->id = $row['id'];
       $this->id_cars = $row['id_cars'];
       $this->name = $row['name'];
@@ -129,10 +140,31 @@ class DocumentsModels
 
   public static function getAllDocuments($conn, $offset, $limit)
   {
-    $sql = "SELECT * FROM documents LIMIT ? OFFSET ?";
+    // Cast parameters to integers to avoid SQL syntax errors
+    $offset = (int)$offset;
+    $limit = (int)$limit;
+
+    $sql = "SELECT * FROM documents LIMIT :limit OFFSET :offset";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ii", $limit, $offset);
+    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
     $stmt->execute();
+
+    $documents = [];
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      $document = new DocumentsModels();
+      $document->id = $row['id'];
+      $document->id_cars = $row['id_cars'];
+      $document->name = $row['name'];
+      $document->description = $row['description'];
+      $document->type = $row['type'];
+      $document->path = $row['path'];
+      $document->updated_at = $row['updated_at'];
+      $document->created_at = $row['created_at'];
+      $documents[] = $document;
+    }
+
+    return $documents;
   }
 
   // Update method
@@ -140,8 +172,14 @@ class DocumentsModels
   {
     $sql = "UPDATE documents SET id_cars = ?, name = ?, description = ?, type = ?, path = ? WHERE id = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("issssi", $this->id_cars, $this->name, $this->description, $this->type, $this->path, $this->id);
-    return $stmt->execute();
+    return $stmt->execute([
+      $this->id_cars,
+      $this->name,
+      $this->description,
+      $this->type,
+      $this->path,
+      $this->id
+    ]);
   }
 
   // Get all ids documents from cars id
@@ -149,11 +187,10 @@ class DocumentsModels
   {
     $sql = "SELECT id FROM documents WHERE id_cars = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $id_cars);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    $stmt->execute([$id_cars]);
+
     $ids = [];
-    while ($row = $result->fetch_assoc()) {
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
       $ids[] = $row['id'];
     }
     return $ids;
@@ -164,8 +201,7 @@ class DocumentsModels
   {
     $sql = "DELETE FROM documents WHERE id = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $this->id);
-    return $stmt->execute();
+    return $stmt->execute([$this->id]);
   }
 
   // Save method
@@ -173,7 +209,12 @@ class DocumentsModels
   {
     $sql = "INSERT INTO documents (id_cars, name, description, type, path) VALUES (?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("issssi", $this->id_cars, $this->name, $this->description, $this->type, $this->path);
-    return $stmt->execute();
+    return $stmt->execute([
+      $this->id_cars,
+      $this->name,
+      $this->description,
+      $this->type,
+      $this->path
+    ]);
   }
 }

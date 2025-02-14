@@ -7,6 +7,6 @@ export function meta(args: Route["MetaArgs"]) {
   ];
 }
 
-export function UpdateCars() {
+export default function UpdateCars() {
   return <UpdateCarsForm />;
 }

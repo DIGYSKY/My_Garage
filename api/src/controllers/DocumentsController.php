@@ -1,7 +1,5 @@
 <?php
 
-require_once 'api/src/models/DocumentsModels.php';
-
 class DocumentsController
 {
   public static function getAllDocuments($params)

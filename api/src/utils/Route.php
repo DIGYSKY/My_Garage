@@ -87,7 +87,7 @@ class Route
         $params = $httpRequest->getParams();
         $this->checkParams($params);
         $response = call_user_func([$controller, $this->action], $params);
-        return $response->send();
+        return $response->sending();
       } else {
         $logger = new Logs();
         $logger->error("La méthode {$this->action} n'existe pas.");

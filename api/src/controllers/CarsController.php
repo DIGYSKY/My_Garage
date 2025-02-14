@@ -1,7 +1,5 @@
 <?php
 
-require_once 'api/src/models/CarsModels.php';
-
 class CarsController
 {
   public static function getAllCars($params)

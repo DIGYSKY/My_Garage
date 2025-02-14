@@ -62,52 +62,52 @@ class HttpRequest
     $this->route = $route;
   }
 
+  public function getParamsUrl()
+  {
+    $urlPath = $this->url;
+    $routePath = $this->route->getPath();
+
+    $urlPath = ltrim($urlPath, '/');
+    $routePath = ltrim($routePath, '/');
+
+    $urlParts = $urlPath ? explode('/', $urlPath) : [];
+    $routeParts = $routePath ? explode('/', $routePath) : [];
+
+    foreach ($routeParts as $index => $routePart) {
+      if (strpos($routePart, ':') === 0) {
+        $paramName = substr($routePart, 1);
+        if (isset($urlParts[$index])) {
+          $paramValue = $urlParts[$index];
+          if (strpos($paramValue, ':') === 0) {
+            $paramValue = substr($paramValue, 1);
+          }
+          $this->params[$paramName] = $paramValue;
+        }
+      }
+    }
+
+    foreach ($this->route->getParams() as $param) {
+      if (isset($_GET[$param])) {
+        $this->params[$param] = $_GET[$param];
+      }
+    }
+  }
+
   public function bindParam()
   {
     switch ($this->method) {
       case "GET":
       case "DELETE":
-        $urlPath = $this->url;
-        $routePath = $this->route->getPath();
-
-        $urlPath = ltrim($urlPath, '/');
-        $routePath = ltrim($routePath, '/');
-
-        $urlParts = $urlPath ? explode('/', $urlPath) : [];
-        $routeParts = $routePath ? explode('/', $routePath) : [];
-
-        foreach ($routeParts as $index => $routePart) {
-          if (strpos($routePart, ':') === 0) {
-            $paramName = substr($routePart, 1);
-            if (isset($urlParts[$index])) {
-              $paramValue = $urlParts[$index];
-              if (strpos($paramValue, ':') === 0) {
-                $paramValue = substr($paramValue, 1);
-              }
-              $this->params[$paramName] = $paramValue;
-            }
-          }
-        }
-
-        foreach ($this->route->getParams() as $param) {
-          if (isset($_GET[$param])) {
-            $this->params[$param] = $_GET[$param];
-          }
-        }
+        $this->getParamsUrl();
         break;
+      case "PUT":
       case "POST":
         $jsonInput = file_get_contents("php://input");
         $postData = json_decode($jsonInput, true);
         if ($postData) {
           $this->params = $postData;
         }
-        break;
-      case "PUT":
-        foreach ($this->route->getParams() as $param) {
-          if (isset($_POST["param"])) {
-            $this->addParam($_POST[$param]);
-          }
-        }
+        $this->getParamsUrl();
         break;
     }
   }
