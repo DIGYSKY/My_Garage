@@ -2,18 +2,11 @@ import { useNavigate } from "react-router";
 import { useState } from "react";
 import axios from "axios";
 import { FormCars } from "./from";
+import type { Cars } from "./add-cars";
 
-export interface Cars {
-  id?: number;
-  brand: string | null;
-  model: string | null;
-  litle_name: string | null;
-  first_registration_date: string | null;
-  price: number | null;
-}
-
-export function AddCars() {
+export function UpdateCars() {
   const [cars, setCars] = useState<Cars>({
+    id: 0,
     brand: "",
     model: "",
     litle_name: "",
@@ -39,7 +32,7 @@ export function AddCars() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log(cars);
-    axios.post("http://localhost:81/cars", cars)
+    axios.put(`http://localhost:81/cars/:${cars.id}`, cars)
       .then((response) => {
         console.log(response);
       })
