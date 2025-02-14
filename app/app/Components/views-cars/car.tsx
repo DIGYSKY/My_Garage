@@ -1,13 +1,31 @@
 import { useEffect, useState } from "react";
 import type { Cars } from "../form-cars/add-cars";
 import axios from "axios";
-import { useParams } from "react-router";
+import { useParams, useNavigate } from "react-router";
 
 export function Car() {
   const [car, setCar] = useState<Cars>();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const { id } = useParams();
+  const navigate = useNavigate();
+
+  const handleDelete = () => {
+    axios.delete(`http://localhost:81/cars/:${id}`)
+      .then(() => {
+        console.log("Véhicule supprimé avec succès");
+        navigate("/");
+      })
+      .catch((error) => {
+        console.log(error);
+        setError(error as Error);
+        setIsLoading(false);
+      });
+  };
+
+  const handleUpdate = () => {
+    navigate(`/cars/update/${id}`);
+  };
 
   useEffect(() => {
     const fetchPersos = async () => {
@@ -41,6 +59,8 @@ export function Car() {
             <p className="text-sm text-gray-500">{car.model}</p>
             <p className="text-sm text-gray-500">{car.price}</p>
             <p className="text-sm text-gray-500">{car.first_registration_date}</p>
+            <button className="bg-blue-500 text-white p-2 rounded" onClick={handleUpdate}>Modifier</button>
+            <button className="bg-red-500 text-white p-2 rounded" onClick={handleDelete}>Supprimer</button>
           </div>
         )}
         {!car && isLoading && (

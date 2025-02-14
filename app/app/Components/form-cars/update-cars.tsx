@@ -1,10 +1,12 @@
-import { useNavigate } from "react-router";
-import { useState } from "react";
+import { useNavigate, useParams } from "react-router";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { FormCars } from "./from";
 import type { Cars } from "./add-cars";
+import { Loader } from "../divers/loader";
 
 export function UpdateCars() {
+  const { id } = useParams();
   const [cars, setCars] = useState<Cars>({
     id: 0,
     brand: "",
@@ -13,6 +15,8 @@ export function UpdateCars() {
     first_registration_date: "",
     price: 0,
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
   const handleChangeBrand = (e: React.ChangeEvent<HTMLInputElement>) => 
     setCars({ ...cars, brand: e.target.value });
@@ -31,15 +35,39 @@ export function UpdateCars() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(cars);
+    setIsLoading(true);
+    setError(null);
     axios.put(`http://localhost:81/cars/:${cars.id}`, cars)
       .then((response) => {
         console.log(response);
+        setIsLoading(false);
       })
       .catch((error) => {
         console.log(error);
+        setError(error as Error);
+        setIsLoading(false);
       });
   };
+
+  useEffect(() => {
+    axios.get(`http://localhost:81/cars/:${id}`)
+      .then((response) => {
+        setCars(response.data);
+      })
+      .catch((error) => {
+        console.log(error);
+        setError(error as Error);
+        setIsLoading(false);
+      });
+  }, [id]);
+
+  if (isLoading) {
+    return <Loader />;
+  }
+
+  if (error) {
+    return <div>Erreur: {error.message}</div>;
+  }
 
   return (
     <FormCars

@@ -2,6 +2,7 @@ import { useNavigate } from "react-router";
 import { useState } from "react";
 import axios from "axios";
 import { FormCars } from "./from";
+import { Loader } from "../divers/loader";
 
 export interface Cars {
   id?: number;
@@ -20,6 +21,8 @@ export function AddCars() {
     first_registration_date: "",
     price: 0,
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
   const handleChangeBrand = (e: React.ChangeEvent<HTMLInputElement>) => 
     setCars({ ...cars, brand: e.target.value });
@@ -38,15 +41,27 @@ export function AddCars() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(cars);
+    setIsLoading(true);
+    setError(null);
     axios.post("http://localhost:81/cars", cars)
       .then((response) => {
         console.log(response);
+        setIsLoading(false);
       })
       .catch((error) => {
         console.log(error);
+        setError(error as Error);
+        setIsLoading(false);
       });
   };
+
+  if (isLoading) {
+    return <Loader />;
+  }
+
+  if (error) {
+    return <div>Erreur: {error.message}</div>;
+  }
 
   return (
     <FormCars
