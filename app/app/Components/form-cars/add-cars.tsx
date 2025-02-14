@@ -1,4 +1,3 @@
-import type { Route } from "../../+types/home";
 import { useNavigate } from "react-router";
 import { useState } from "react";
 import axios from "axios";
@@ -9,13 +8,6 @@ export interface Cars {
   litle_name: string | null;
   first_registration_date: string | null;
   price: number | null;
-}
-
-export function meta(args: Route["MetaArgs"]) {
-  return [
-    { title: "Add Cars" },
-    { name: "description", content: "Ajouter un véhicule" },
-  ];
 }
 
 export function AddCars() {
