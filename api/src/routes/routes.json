@@ -66,5 +66,65 @@
       "id"
     ],
     "manager": []
+  },
+  {
+    "path": "/documents/:limit/:offset",
+    "controller": "Documents",
+    "action": "getAllDocuments",
+    "method": "GET",
+    "params": [
+      "limit",
+      "offset"
+    ],
+    "manager": []
+  },
+  {
+    "path": "/documents/:id",
+    "controller": "Documents",
+    "action": "getDocumentById",
+    "method": "GET",
+    "params": [
+      "id"
+    ],
+    "manager": []
+  },
+  {
+    "path": "/documents",
+    "controller": "Documents",
+    "action": "createDocument",
+    "method": "POST",
+    "params": [
+      "id_cars",
+      "name",
+      "description",
+      "type",
+      "path"
+    ],
+    "manager": []
+  },
+  {
+    "path": "/documents/:id",
+    "controller": "Documents",
+    "action": "updateDocument",
+    "method": "PUT",
+    "params": [
+      "id",
+      "id_cars",
+      "name",
+      "description",
+      "type",
+      "path"
+    ],
+    "manager": []
+  },
+  {
+    "path": "/documents/:id",
+    "controller": "Documents",
+    "action": "deleteDocument",
+    "method": "DELETE",
+    "params": [
+      "id"
+    ],
+    "manager": []
   }
 ]

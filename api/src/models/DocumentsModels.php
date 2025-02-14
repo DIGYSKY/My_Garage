@@ -127,6 +127,14 @@ class DocumentsModels
     }
   }
 
+  public static function getAllDocuments($conn, $offset, $limit)
+  {
+    $sql = "SELECT * FROM documents LIMIT ? OFFSET ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ii", $limit, $offset);
+    $stmt->execute();
+  }
+
   // Update method
   public function update($conn)
   {
@@ -134,6 +142,21 @@ class DocumentsModels
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("issssi", $this->id_cars, $this->name, $this->description, $this->type, $this->path, $this->id);
     return $stmt->execute();
+  }
+
+  // Get all ids documents from cars id
+  public function getAllIdsDocumentsFromCarsId($conn, $id_cars)
+  {
+    $sql = "SELECT id FROM documents WHERE id_cars = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $id_cars);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $ids = [];
+    while ($row = $result->fetch_assoc()) {
+      $ids[] = $row['id'];
+    }
+    return $ids;
   }
 
   // Delete method
