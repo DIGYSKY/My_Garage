@@ -27,6 +27,18 @@ restart_services() {
 }
 
 start_services() {
+    # Vérifie l'existence des dossiers de logs
+    if [ ! -d "./logs" ]; then
+        mkdir ./logs
+    fi
+
+    if [ ! -d "./logs/nginx" ]; then
+        mkdir ./logs/nginx
+    fi
+
+    if [ ! -d "./logs/requests" ]; then
+        mkdir ./logs/requests
+    fi
     if [ "$2" != "-b" ]; then
         trap handle_interrupt SIGINT
     fi
