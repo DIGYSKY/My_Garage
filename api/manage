@@ -152,9 +152,19 @@ show_help() {
     echo -e "  ${GREEN}help${NC}     Affiche ce message d'aide\n"
 }
 
+start_app() {
+    echo -e "${GREEN}Démarrage de l'application...${NC}"
+    cd ../app
+    yarn dev
+    cd ../api
+}
+
 case "$1" in
     start)
         start_services "$@"
+        ;;
+    start-app)
+        start_app
         ;;
     stop)
         stop_services
