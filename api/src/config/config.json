@@ -9,7 +9,7 @@
     "port": 3306,
     "user": "root",
     "password": "root",
-    "database": "my_coda_application_api"
+    "database": "my_garage"
   },
   "basepath": ""
 }
