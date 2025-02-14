@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    ports:
+      - "81:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ..:/var/www/html
+      - ../logs/nginx:/var/www/html/logs/nginx
+    depends_on:
+      - php
+    networks:
+      - app_network
+      - DB_network
+
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile.php
+    container_name: php
+    volumes:
+      - ..:/var/www/html
+    networks:
+      - app_network
+      - DB_network
+
+  MySQL:
+    image: mysql:8.0
+    container_name: MySQL
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_DATABASE: my_garage
+    networks:
+      - DB_network
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./data:/var/lib/mysql
+      - ./my_garage.sql:/docker-entrypoint-initdb.d/my_garage.sql
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  phpmyadmin:
+    image: arm64v8/phpmyadmin
+    container_name: phpmyadmin
+    environment:
+      PMA_HOST: MySQL
+      PMA_PORT: 3306
+    ports:
+      - "8080:80"
+    networks:
+      - DB_network
+    depends_on:
+      - MySQL
+
+volumes:
+  mysql-data:
+
+
+networks:
+  DB_network:
+    driver: bridge
+  app_network:
+    driver: bridge

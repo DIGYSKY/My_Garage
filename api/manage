@@ -1,0 +1,185 @@
+#!/bin/bash
+
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+BLUE='\033[0;34m'
+BOLD='\033[1m'
+NC='\033[0m'
+
+COMPOSE_FILE="./My_Garage/docker-compose.yml"
+
+handle_clear_logs_app() {
+    echo "" > ./logs/app.log
+    echo "" > ./logs/nginx/access.log
+    echo "" > ./logs/nginx/error.log
+}
+
+handle_interrupt() {
+    echo -e "\n${RED}Interruption détectée. Arrêt des services...${NC}"
+    stop_services
+    exit 0
+}
+
+restart_services() {
+    echo -e "\n${RED}Redémarrage des services...${NC}"
+    stop_services
+    start_services "$@"
+}
+
+start_services() {
+    if [ "$2" != "-b" ]; then
+        trap handle_interrupt SIGINT
+    fi
+
+    echo -e "${GREEN}Démarrage des services...${NC}"
+    docker compose -f $COMPOSE_FILE up -d --build
+    echo -e "${GREEN}Services démarrés!${NC}"
+    echo -e "${RED}Ctrl+C pour arrêter les services${NC}"
+    echo -e "${BLUE}http://localhost${BOLD}:81${NC}"
+    handle_clear_logs_app
+    if [ "$2" != "-b" ]; then
+        ./manage logs api
+    fi
+}
+
+stop_services() {
+    echo -e "${RED}Arrêt des services...${NC}"
+    docker compose -f $COMPOSE_FILE down
+    echo -e "${RED}Services arrêtés!${NC}"
+}
+
+logs_services() {
+    local service=$2
+    case "$service" in
+        api)
+            echo -e "${GREEN}Logs API...${NC}"
+            tail -f ./logs/app.log
+            ;;
+        php)
+            echo -e "${GREEN}Affichage des logs PHP...${NC}"
+            docker logs -f php
+            ;;
+        nginx)
+            echo -e "${GREEN}Affichage des logs Nginx...${NC}"
+            docker logs -f nginx
+            ;;
+        mysql)
+            echo -e "${GREEN}Affichage des logs MySQL...${NC}"
+            docker logs -f MySQL
+            ;;
+        *)
+            echo "Usage: $0 logs {php|nginx|mysql|api}"
+            exit 1
+            ;;
+    esac
+}
+
+edit_config() {
+    local service=$2
+    case "$service" in
+        php)
+            echo -e "${GREEN}Édition de la configuration PHP...${NC}"
+            nano "./My_Garage/php.ini"
+            docker compose -f $COMPOSE_FILE restart php
+            ;;
+        nginx)
+            echo -e "${GREEN}Édition de la configuration Nginx...${NC}"
+            nano "./My_Garage/nginx.conf"
+            docker compose -f $COMPOSE_FILE restart nginx
+            ;;
+        docker)
+            echo -e "${GREEN}Édition de la configuration Docker Compose...${NC}"
+            nano "$COMPOSE_FILE"
+            ;;
+        *)
+            echo "Usage: $0 config {php|nginx|docker}"
+            exit 1
+            ;;
+    esac
+}
+
+status_services() {
+    echo -e "\n${GREEN}📊 Status des services${NC}"
+
+    echo -e "\n${GREEN}Conteneurs Docker:${NC}"
+    if [ -f "$COMPOSE_FILE" ]; then
+        echo -e "  🔍 Vérification des conteneurs..."
+        docker compose -f "$COMPOSE_FILE" ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null || {
+            echo -e "  ❌ ${RED}Erreur lors de la vérification des conteneurs${NC}"
+        }
+    else
+        echo -e "  ❌ ${RED}Fichier docker-compose.yml non trouvé à: $COMPOSE_FILE${NC}"
+    fi
+
+    echo -e "\n${GREEN}Ports utilisés:${NC}"
+    echo -e "  🔍 Scanning des ports courants..."
+    {
+        echo -e "  ${GREEN}Service\tPort\tStatus${NC}"
+        lsof -i :80 -i :443 -i :3306 -i :3307 -i :8080 -i :9000 -P -n 2>/dev/null | grep LISTEN | \
+        sort -u -k 9 | \
+        while read -r line; do
+            process=$(echo "$line" | awk '{print $1}')
+            port=$(echo "$line" | awk '{print $9}' | cut -d':' -f2)
+            echo -e "  $process\t$port\t${GREEN}LISTEN${NC}"
+        done
+    } || echo -e "  ℹ️  Aucun port trouvé"
+    
+    echo ""
+}
+
+show_help() {
+    echo -e "\n${GREEN}📋 Gestionnaire de Services PHP/Nginx${NC}"
+    echo -e "\nUtilisation: $0 [commande] [options]"
+    
+    echo -e "\n${GREEN}Commandes disponibles:${NC}"
+    echo -e "  ${GREEN}start${NC}    Démarre tous les services (PHP, Nginx, Docker) et affiche les logs API en temps réel"
+    echo -e "  ${GREEN}start -b${NC} Démarre tous les services (PHP, Nginx, Docker) en arrière-plan"
+    echo -e "  ${GREEN}stop${NC}     Arrête tous les services"
+    echo -e "  ${GREEN}restart${NC}  Redémarre tous les services"
+    
+    echo -e "\n${GREEN}Logs:${NC}"
+    echo -e "  ${GREEN}logs php-fpm${NC}   Affiche les logs PHP en temps réel"
+    echo -e "  ${GREEN}logs nginx${NC}     Affiche les logs Nginx en temps réel"
+    echo -e "  ${GREEN}logs mysql${NC}     Affiche les logs MySQL en temps réel"
+    echo -e "  ${GREEN}logs api${NC}       Affiche les logs API en temps réel"
+
+    echo -e "\n${GREEN}Configuration:${NC}"
+    echo -e "  ${GREEN}config php${NC}    Édite le fichier php.ini"
+    echo -e "  ${GREEN}config nginx${NC}  Édite le fichier nginx.conf"
+    echo -e "  ${GREEN}config docker${NC} Édite le fichier docker-compose.yml"
+
+    echo -e "\n${GREEN}Aide:${NC}"
+    echo -e "  ${GREEN}help${NC}     Affiche ce message d'aide\n"
+}
+
+case "$1" in
+    start)
+        start_services "$@"
+        ;;
+    stop)
+        stop_services
+        ;;
+    restart)
+        stop_services
+        echo "Redémarrage des services..."
+        start_services
+        ;;
+    logs)
+        logs_services "$@"
+        ;;
+    config)
+        edit_config "$@"
+        ;;
+    status)
+        status_services
+        ;;
+    help|--help|-h)
+        show_help
+        ;;
+    *)
+        show_help
+        exit 1
+        ;;
+esac
+
+exit 0

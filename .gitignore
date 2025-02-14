@@ -1,0 +1,6 @@
+.DS_Store
+api/My_Garage/data/
+api/logs/
+.vscode/
+yarn.lock
+node_modules/
