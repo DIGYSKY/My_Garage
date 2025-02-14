@@ -6,5 +6,65 @@
     "method": "GET",
     "params": [],
     "manager": []
+  },
+  {
+    "path": "/cars/:limit/:offset",
+    "controller": "Cars",
+    "action": "getAllCars",
+    "method": "GET",
+    "params": [
+      "limit",
+      "offset"
+    ],
+    "manager": []
+  },
+  {
+    "path": "/cars/:id",
+    "controller": "Cars",
+    "action": "getCarById",
+    "method": "GET",
+    "params": [
+      "id"
+    ],
+    "manager": []
+  },
+  {
+    "path": "/cars",
+    "controller": "Cars",
+    "action": "createCar",
+    "method": "POST",
+    "params": [
+      "litle_name",
+      "brand",
+      "model",
+      "first_registration_date",
+      "price"
+    ],
+    "manager": []
+  },
+  {
+    "path": "/cars/:id",
+    "controller": "Cars",
+    "action": "updateCar",
+    "method": "PUT",
+    "params": [
+      "id",
+      "litle_name",
+      "brand",
+      "model",
+      "first_registration_date",
+      "price"
+    ],
+    "manager": []
+  },
+  {
+    "path": "/cars/:id",
+    "controller": "Cars",
+    "action": "deleteCar",
+    "method": "DELETE",
+    "params": [
+      "id"
+    ],
+    "manager": []
   }
 ]
