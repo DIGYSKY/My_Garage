@@ -54,10 +54,18 @@ CREATE TABLE `documents` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 --
--- Index pour les tables déchargées
+-- Structure de la table `images`
 --
 
+CREATE TABLE `images` (
+  `id` int NOT NULL,
+  `id_cars` int NOT NULL REFERENCES `cars`(`id`),
+  `path` varchar(255) NOT NULL,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 --
 -- Index pour la table `cars`
 --
@@ -71,6 +79,12 @@ ALTER TABLE `documents`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Index pour la table `images`
+--
+ALTER TABLE `images`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- AUTO_INCREMENT pour les tables déchargées
 --
 
@@ -81,6 +95,9 @@ ALTER TABLE `cars`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 ALTER TABLE `documents`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `images`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 COMMIT;
 
