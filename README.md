@@ -11,6 +11,8 @@ My Garage est une application web full-stack permettant de gérer une collection
 - MySQL 8.0
 - Nginx
 - Docker & Docker Compose
+  - Installation de Docker : [Guide d'installation Docker](https://docs.docker.com/get-docker/)
+  - Installation de Docker Compose : [Guide d'installation Docker Compose](https://docs.docker.com/compose/install/)
 
 ### Frontend
 - React 19
@@ -41,7 +43,7 @@ Le projet est divisé en deux parties principales :
 Trois tables principales :
 - `cars` : Informations sur les véhicules
 - `documents` : Documents associés aux véhicules
-- `images` : Images des véhicules
+- `images` : Images des véhicules (à venir)
 
 ## 🚀 Installation
 
