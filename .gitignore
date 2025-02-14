@@ -4,3 +4,4 @@ api/logs/
 .vscode/
 yarn.lock
 node_modules/
+.react-router/

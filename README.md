@@ -4,6 +4,10 @@
 
 My Garage est une application web full-stack permettant de gérer une collection de véhicules et leurs documents associés. Elle utilise une architecture moderne avec un backend PHP et un frontend React.
 
+## 🧑‍💻 Auteur
+
+- [DIGYSKY (Lilyan CHAUVEAU)](https://github.com/DIGYSKY)
+
 ## 🛠 Technologies Utilisées
 
 ### Backend
