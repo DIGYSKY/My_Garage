@@ -30,11 +30,11 @@ export function Cars() {
       <div className="grid gap-4">
         {cars.map((car: Cars) => (
           <div key={car.brand} className="p-4 border rounded shadow">
-            <h2 className="font-bold">{car.litle_name}</h2>
-            <p>{car.brand}</p>
-            <p>{car.model}</p>
-            <p>{car.price}</p>
-            <p>{car.first_registration_date}</p>
+            <h2 className="text-lg font-bold">{car.litle_name}</h2>
+            <p className="text-sm text-gray-500">{car.brand}</p>
+            <p className="text-sm text-gray-500">{car.model}</p>
+            <p className="text-sm text-gray-500">{car.price}</p>
+            <p className="text-sm text-gray-500">{car.first_registration_date}</p>
           </div>
         ))}
       </div>
